@@ -32,23 +32,30 @@ function askLoop(rootList, root, category, currentFile) {
             }
         )
     } else {
-        fileUtils.getDirectoriesFromDir(path.resolve(__dirname, './questions/' + root + '/' + category)).then(
+        fileUtils.getFilesFromDir(path.resolve(__dirname, './questions/' + root + '/' + category), '.js').then(
             (folders) => {
                 const answers = ['...', ...folders];
                 ask('Practice', answers, '').then(
                     (answer) => {
-                        const file = fs.readFileSync(path.resolve(__dirname, `./questions/${root}/${category}/${answer}`));
-                        const options = { flag : 'w' };
+                        if (answer === '...') {
+                            askLoop(rootList, root, '...', undefined);
+                        } else {
+                            const fileName = path.resolve(__dirname, `./questions/${root}/${category}/${answer}`);
+                            console.log(fileName);
+                            const file = fs.readFileSync(fileName);
+                            const options = { flag : 'w' };
+                            console.log(`file = ${file}`);
 
-                        fs.writeFile(path.resolve(__dirname, './trainingFile.js'), file, options, (err) => {
-                            console.log(err);
-                        })
-                        
+                            fs.writeFile(path.resolve(__dirname, './trainingFile.js'), file, options, (err) => {
+                                console.log(err);
+                            });
+                            askLoop(rootList, root, category, undefined);
+                        }
                     }
                 )
             },
             (err) => {
-
+                console.log(err);
             }
         )
     }

@@ -6,7 +6,7 @@ function getFilesFromDir(dir, extension, exclude) {
     const selectedFiles = [];
     fs.readdir(dir, (err, files) => {
       if (err) {
-        reject();
+        reject(err);
         return;
       }
       files.forEach(file => {
@@ -32,12 +32,11 @@ function getFilesFromDir(dir, extension, exclude) {
 
 
 function getDirectoriesFromDir(folder) {
-  console.log('in getDirectories from dir');
   return new Promise((resolve, reject) => {
     const dir = []
     fs.readdir(folder, (err, files) => {
       if (err) {
-        reject();
+        reject(err);
         return;
       }
       files.forEach(file => {
