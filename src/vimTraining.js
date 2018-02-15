@@ -13,11 +13,45 @@ const fileUtils = require('./fileUtils');
 //     console.log(err);
 // })
 
-function askLoop(root, category, currentFile) {
+function askLoop(rootList, root, category, currentFile) {
     console.log('in askLoop');
-    if (!category) {
-        ask('Chapter', root, '').then((answer) => {askLoop(root, answer, undefined)}, (err) => {})
-    };
+    if (!root || category === '...') {
+        ask('Chapter', rootList, '').then((answer) => {askLoop(rootList, answer, undefined, undefined)}, (err) => {console.log('in Error')})
+    } else if (!category || currentFile === '...') {
+        fileUtils.getDirectoriesFromDir(path.resolve(__dirname, './questions/' + root)).then(
+            (folders) => {
+                const answers = ['...', ...folders];
+                ask('Category', answers, '').then(
+                    (answer) => {
+                        askLoop(rootList, root, answer, undefined);
+                    }
+                )
+            },
+            (err) => {
+
+            }
+        )
+    } else {
+        fileUtils.getDirectoriesFromDir(path.resolve(__dirname, './questions/' + root + '/' + category)).then(
+            (folders) => {
+                const answers = ['...', ...folders];
+                ask('Practice', answers, '').then(
+                    (answer) => {
+                        const file = fs.readFileSync(path.resolve(__dirname, `./questions/${root}/${category}/${answer}`));
+                        const options = { flag : 'w' };
+
+                        fs.writeFile(path.resolve(__dirname, './trainingFile.js'), file, options, (err) => {
+                            console.log(err);
+                        })
+                        
+                    }
+                )
+            },
+            (err) => {
+
+            }
+        )
+    }
 }
 
 async function init() {
@@ -25,7 +59,7 @@ async function init() {
     try {
         const rootDir = await fileUtils.getDirectoriesFromDir(path.resolve(__dirname, './questions'));
         console.log(`rootdir ${rootDir}`);
-        askLoop(rootDir, undefined, undefined);
+        askLoop(rootDir, undefined, undefined, undefined);
     } catch (e) {
         console.log(`error: ${e}`);
     }
